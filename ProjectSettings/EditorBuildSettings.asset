@@ -5,9 +5,13 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/Samples/Google Cardboard XR Plugin for Unity/1.23.0/Hello Cardboard/Scenes/HelloCardboard.unity
     guid: 145a2a45d7bc746b19cb68410368bf96
+  - enabled: 1
+    path: Assets/Scenes/assignment01.unity
+    guid: b0dc32631a18645beaa435322430d630
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: 9991f987fc27a834d83e039efe263bbc, type: 2}
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 86b23d30d91511c40b0b92e95c00b4f4, type: 2}
+    xr.sdk.mock-hmd.settings: {fileID: 11400000, guid: 3557d5ac6c8ee4d5aa8533f9b36a3d23, type: 2}
