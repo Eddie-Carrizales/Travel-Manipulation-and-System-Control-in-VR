@@ -1,15 +1,27 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.EventSystems;
 
-public class ObjectInteractions : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class ObjectInteractions : MonoBehaviour
 {
-    private GameObject hoveredObject;
+    private GameObject currentSphere;
     private Renderer objectRenderer;
     private Color originalColor;
-    private Outline objectOutline;
-    private bool collisionOccurred;
+
+    private Outline cube1_Outline;
+    private Outline cube2_Outline;
+    private Outline cube3_Outline;
+    private Outline sphere1_Outline;
+    private Outline sphere2_Outline;
+    private Outline sphere3_Outline;
+
+    private CollisionDetection cube1_Collision;
+    private CollisionDetection cube2_Collision;
+    private CollisionDetection cube3_Collision;
+    private CollisionDetection sphere1_Collision;
+    private CollisionDetection sphere2_Collision;
+    private CollisionDetection sphere3_Collision;
+
     private bool isOriginalColor;
     private GameObject character;
     private GameObject cube1;
@@ -21,8 +33,12 @@ public class ObjectInteractions : MonoBehaviour, IPointerEnterHandler, IPointerE
 
     //Mappings
     //CURRENT CONFIGURATION = MAC
-    private string XButton = "js11";
-    private string YButton = "js5";
+    //private string XButton = "js11";
+    //private string YButton = "js5";
+
+    //CURRENT CONFIGURATION = Android
+    private string XButton = "js2";
+    private string YButton = "js3";
 
     // Start is called before the first frame update
     void Start()
@@ -38,6 +54,19 @@ public class ObjectInteractions : MonoBehaviour, IPointerEnterHandler, IPointerE
         sphere2 = GameObject.Find("Sphere2");
         sphere3 = GameObject.Find("Sphere3");
 
+        cube1_Outline = cube1.GetComponent<Outline>();
+        cube2_Outline = cube2.GetComponent<Outline>();
+        cube3_Outline = cube3.GetComponent<Outline>();
+        sphere1_Outline = sphere1.GetComponent<Outline>();
+        sphere2_Outline = sphere2.GetComponent<Outline>();
+        sphere3_Outline = sphere3.GetComponent<Outline>();
+
+        cube1_Collision = cube1.GetComponent<CollisionDetection>();
+        cube2_Collision = cube2.GetComponent<CollisionDetection>();
+        cube3_Collision = cube3.GetComponent<CollisionDetection>();
+        sphere1_Collision = sphere1.GetComponent<CollisionDetection>();
+        sphere2_Collision = sphere2.GetComponent<CollisionDetection>();
+        sphere3_Collision = sphere3.GetComponent<CollisionDetection>();
 
         // Get the Renderer component attached to the cube3 GameObject
         objectRenderer = cube3.GetComponent<Renderer>();
@@ -49,35 +78,44 @@ public class ObjectInteractions : MonoBehaviour, IPointerEnterHandler, IPointerE
     // Update is called once per frame
     void Update()
     {
+
         // Move the car when X key is pressed and hover movement is enabled
-        if (!collisionOccurred && Input.GetButtonDown(XButton) && hoveredObject.name == "Cube1")
+        if (cube1_Collision.isColliding == false && Input.GetButton(XButton) && cube1_Outline.enabled == true)
         {
             TranslateObject();
         }
-        else if (Input.GetButtonDown(XButton) && hoveredObject.name == "Cube2")
+        else if (Input.GetButton(XButton) && cube2_Outline.enabled == true)
         {
             RotateObject();
         }
-        else if (Input.GetButtonDown(XButton) && hoveredObject.name == "Cube3")
+        else if (Input.GetButtonDown(XButton) && cube3_Outline.enabled == true)
         {
             ChangeObjectColor();
         }
-        else if (Input.GetButtonDown(YButton) && (hoveredObject.name == "Sphere1" || hoveredObject.name == "Sphere2" || hoveredObject.name == "Sphere3"))
+        else if (Input.GetButtonDown(YButton) && (sphere1_Outline.enabled == true))
         {
-            TeleportToObject();
+            TeleportToObject(sphere1);
+        }
+        else if (Input.GetButtonDown(YButton) && (sphere2_Outline.enabled == true))
+        {
+            TeleportToObject(sphere2);
+        }
+        else if (Input.GetButtonDown(YButton) && (sphere3_Outline.enabled == true))
+        {
+            TeleportToObject(sphere3);
         }
     }
 
     void TranslateObject()
     {
         // Move the cube 1 centimeter in the x direction every frame
-        cube1.transform.position += Vector3.right * 0.01f;
+        cube1.transform.position += Vector3.back * 0.1f;
     }
 
     void RotateObject()
     {
         // Rotate the cube by 1 degree around the y-axis
-        cube2.transform.Rotate(Vector3.up, 1f);
+        cube2.transform.RotateAround(cube2.transform.position, Vector3.up, 5f);
     }
 
     void ChangeObjectColor()
@@ -95,51 +133,9 @@ public class ObjectInteractions : MonoBehaviour, IPointerEnterHandler, IPointerE
         isOriginalColor = !isOriginalColor;
     }
 
-    void TeleportToObject()
+    void TeleportToObject(GameObject currentSphere)
     {
-        character.transform.position = hoveredObject.transform.position;
-    }
-
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        
-        if (gameObject.tag == "assignment2Objects")
-        {
-            hoveredObject = gameObject; // Store reference to the object when pointer enters
-            
-            //Get outline scripts from the game objects
-            Outline objectOutline = hoveredObject.GetComponent<Outline>();
-            objectOutline.enabled = true;
-        }
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        if (hoveredObject != null)
-        {
-            hoveredObject = null; // Clear reference when pointer exits
-            objectOutline.enabled = false;
-        }
-    }
-
-    private void OnCollisionEnter(Collision collision)
-    {
-        
-        // Check if the collided object has a specific tag and collides with "cube1"
-        if (collision.gameObject.CompareTag("assignment2Objects") && collision.gameObject == cube1)
-        {
-            // Occurs when collision happens with an object with the specified tag and "cube1"
-            collisionOccurred = true;
-        }
-    }
-    
-    private void OnCollisionExit(Collision collision)
-    {
-        // Check if the collided object has a specific tag and collides with "cube1"
-        if (collision.gameObject.CompareTag("assignment2Objects") && collision.gameObject == cube1)
-        {
-            // Occurs when collision happens with an object with the specified tag and "cube1"
-            collisionOccurred = false;
-        }
+        character.transform.position = currentSphere.transform.position;
+        Destroy(currentSphere);
     }
 }
