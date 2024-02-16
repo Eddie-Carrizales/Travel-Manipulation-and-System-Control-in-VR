@@ -4,10 +4,7 @@ using UnityEngine;
 
 public class ObjectInteractions : MonoBehaviour
 {
-    private GameObject currentSphere;
-    private Renderer objectRenderer;
-    private Color originalColor;
-
+    //outline variables
     private Outline cube1_Outline;
     private Outline cube2_Outline;
     private Outline cube3_Outline;
@@ -15,6 +12,7 @@ public class ObjectInteractions : MonoBehaviour
     private Outline sphere2_Outline;
     private Outline sphere3_Outline;
 
+    //collision variables
     private CollisionDetection cube1_Collision;
     private CollisionDetection cube2_Collision;
     private CollisionDetection cube3_Collision;
@@ -23,6 +21,10 @@ public class ObjectInteractions : MonoBehaviour
     private CollisionDetection sphere3_Collision;
 
     private bool isOriginalColor;
+    private bool isTeleporting;
+
+    //Gameobjects
+    private GameObject currentSphere;
     private GameObject character;
     private GameObject cube1;
     private GameObject cube2;
@@ -31,19 +33,21 @@ public class ObjectInteractions : MonoBehaviour
     private GameObject sphere2;
     private GameObject sphere3;
 
+    private Renderer objectRenderer;
+    private Color originalColor;
+
     //Mappings
     //CURRENT CONFIGURATION = MAC
-    //private string XButton = "js11";
-    //private string YButton = "js5";
+    private string XButton = "js11";
+    private string YButton = "js5";
 
     //CURRENT CONFIGURATION = Android
-    private string XButton = "js2";
-    private string YButton = "js3";
+    //private string XButton = "js2";
+    //private string YButton = "js3";
 
-    // Start is called before the first frame update
     void Start()
     {
-        // Find the object with the specified name
+        //Using gameobject.find to find all the objects in the scene
         character = GameObject.Find("Character");
 
         cube1 = GameObject.Find("Cube1");
@@ -54,6 +58,7 @@ public class ObjectInteractions : MonoBehaviour
         sphere2 = GameObject.Find("Sphere2");
         sphere3 = GameObject.Find("Sphere3");
 
+        //getting all the outline components from the game objects
         cube1_Outline = cube1.GetComponent<Outline>();
         cube2_Outline = cube2.GetComponent<Outline>();
         cube3_Outline = cube3.GetComponent<Outline>();
@@ -61,6 +66,7 @@ public class ObjectInteractions : MonoBehaviour
         sphere2_Outline = sphere2.GetComponent<Outline>();
         sphere3_Outline = sphere3.GetComponent<Outline>();
 
+        //getting all the collisionDetection scripts from the game objects
         cube1_Collision = cube1.GetComponent<CollisionDetection>();
         cube2_Collision = cube2.GetComponent<CollisionDetection>();
         cube3_Collision = cube3.GetComponent<CollisionDetection>();
@@ -68,18 +74,14 @@ public class ObjectInteractions : MonoBehaviour
         sphere2_Collision = sphere2.GetComponent<CollisionDetection>();
         sphere3_Collision = sphere3.GetComponent<CollisionDetection>();
 
-        // Get the Renderer component attached to the cube3 GameObject
         objectRenderer = cube3.GetComponent<Renderer>();
 
-        // Store the original color of the object
         originalColor = objectRenderer.material.color;
     }
 
-    // Update is called once per frame
     void Update()
     {
-
-        // Move the car when X key is pressed and hover movement is enabled
+        // if else statement to perform translation, rotation, color change, and teleportation
         if (cube1_Collision.isColliding == false && Input.GetButton(XButton) && cube1_Outline.enabled == true)
         {
             TranslateObject();
@@ -92,35 +94,40 @@ public class ObjectInteractions : MonoBehaviour
         {
             ChangeObjectColor();
         }
-        else if (Input.GetButtonDown(YButton) && (sphere1_Outline.enabled == true))
+        else if (Input.GetButtonDown(YButton) && sphere1_Outline.enabled == true && !isTeleporting)
         {
-            TeleportToObject(sphere1);
+            sphere1_Outline.enabled = false;
+            StartCoroutine(TeleportCoroutine(sphere1));
+
         }
-        else if (Input.GetButtonDown(YButton) && (sphere2_Outline.enabled == true))
+        else if (Input.GetButtonDown(YButton) && sphere2_Outline.enabled == true && !isTeleporting)
         {
-            TeleportToObject(sphere2);
+            sphere2_Outline.enabled = false;
+            StartCoroutine(TeleportCoroutine(sphere2));
+            
         }
-        else if (Input.GetButtonDown(YButton) && (sphere3_Outline.enabled == true))
+        else if (Input.GetButtonDown(YButton) && sphere3_Outline.enabled == true && !isTeleporting)
         {
-            TeleportToObject(sphere3);
+            sphere3_Outline.enabled = false;
+            StartCoroutine(TeleportCoroutine(sphere3));
         }
     }
 
+    //moves the object in the -x direction
     void TranslateObject()
     {
-        // Move the cube 1 centimeter in the x direction every frame
         cube1.transform.position += Vector3.back * 0.1f;
     }
 
+    //rotates the object around its axis
     void RotateObject()
     {
-        // Rotate the cube by 1 degree around the y-axis
-        cube2.transform.RotateAround(cube2.transform.position, Vector3.up, 5f);
+        cube2.transform.RotateAround(cube2.transform.position, Vector3.up, 4f);
     }
 
+    //changes the objects color between original color and black
     void ChangeObjectColor()
     {
-        // Toggle between the original color and black
         if (!isOriginalColor)
         {
             objectRenderer.material.color = originalColor;
@@ -129,13 +136,34 @@ public class ObjectInteractions : MonoBehaviour
         {
             objectRenderer.material.color = Color.black;
         }
-        // Update the toggle state
+
         isOriginalColor = !isOriginalColor;
     }
 
-    void TeleportToObject(GameObject currentSphere)
+    //teleports to the object
+    IEnumerator TeleportCoroutine(GameObject currentSphere)
     {
-        character.transform.position = currentSphere.transform.position;
-        Destroy(currentSphere);
+
+        isTeleporting = true;
+
+        Vector3 finalPosition = currentSphere.transform.position;
+
+        float elapsedTime = 0;
+
+        //Added this re-teleportation timer becuase it kept skiping the teleportation code
+        //maybe MAC problem, but I will keep the code just in case.
+        while (elapsedTime < 0.1f)
+        {
+            character.transform.position = finalPosition;
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        //sets object position to currentSphere which is being poited at.
+        character.transform.position = finalPosition;
+
+        currentSphere.SetActive(false);
+
+        isTeleporting = false;
     }
 }
