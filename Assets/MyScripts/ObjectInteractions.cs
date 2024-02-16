@@ -38,12 +38,12 @@ public class ObjectInteractions : MonoBehaviour
 
     //Mappings
     //CURRENT CONFIGURATION = MAC
-    private string XButton = "js11";
-    private string YButton = "js5";
+    //private string XButton = "js11";
+    //private string YButton = "js5";
 
     //CURRENT CONFIGURATION = Android
-    //private string XButton = "js2";
-    //private string YButton = "js3";
+    private string XButton = "js2";
+    private string YButton = "js3";
 
     void Start()
     {
