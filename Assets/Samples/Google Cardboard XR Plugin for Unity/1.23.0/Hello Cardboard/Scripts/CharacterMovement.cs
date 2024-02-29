@@ -6,7 +6,7 @@ public class CharacterMovement : MonoBehaviour
 {
     CharacterController charCntrl;
     [Tooltip("The speed at which the character will move.")]
-    public float speed = 5f;
+    public float speed;
     [Tooltip("The camera representing where the character is looking.")]
     public GameObject cameraObj;
     [Tooltip("Should be checked if using the Bluetooth Controller to move. If using keyboard, leave this unchecked.")]
@@ -18,17 +18,25 @@ public class CharacterMovement : MonoBehaviour
     void Start()
     {
         charCntrl = GetComponent<CharacterController>();
+        speed = 5.0f;
     }
 
     // Update is called once per frame
     void Update()
     {
-
-        //Get horizontal and Vertical movements
-        float horComp = Input.GetAxis("Horizontal");
-        float vertComp = Input.GetAxis("Vertical");
-
         bool movement_is_constrained = raycastInteractionManager.movement_is_constrained;
+        bool main_menu_is_active = raycastInteractionManager.main_menu_is_active;
+
+        float horComp = 0f;
+        float vertComp = 0f;
+
+        //if main menu is not active, look around normaly, else it stays locked
+        if (!main_menu_is_active)
+        {
+            //Get horizontal and Vertical movements
+            horComp = Input.GetAxis("Horizontal");
+            vertComp = Input.GetAxis("Vertical");
+        }
 
         if (joyStickMode)
         {

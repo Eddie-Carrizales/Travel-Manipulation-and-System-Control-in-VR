@@ -10,6 +10,7 @@ public class RaycastInteractionManager : MonoBehaviour
     private LayerMask myLayerMask2;
     public LineRenderer lineRenderer;
     private Outline outline_component;
+    public GameObject mainMenu;
 
     public GameObject menuCanvasPrefab;
     private GameObject menuCanvasInstance;
@@ -19,9 +20,12 @@ public class RaycastInteractionManager : MonoBehaviour
     private bool is_cutting = false;
     private bool is_teleporting = false;
     public bool movement_is_constrained = false;
+    public bool main_menu_is_active = false;
 
     private GameObject copiedObject; // Reference to the copied object
     private GameObject cutObject; // Reference to the cut object
+
+    public MainMenuController mainMenuController;
 
     private bool menu_is_active = false;
 
@@ -29,14 +33,16 @@ public class RaycastInteractionManager : MonoBehaviour
     //CURRENT CONFIGURATION = MAC
     private string X_Button = "js11";
     private string Y_Button = "js5";
-    private string A_Button = "js7"; //trigger button
+    private string A_Button = ""; 
     private string B_Button = "js10";
+    private string OK_Button = "js7";
 
     //CURRENT CONFIGURATION = Android
     //private string X_Button = "js2";
     //private string Y_Button = "js3";
     //private string A_Button = "js10";
     //private string B_Button = "js5";
+    //private string OK_Button = "";
 
    void Start()
     {
@@ -46,7 +52,23 @@ public class RaycastInteractionManager : MonoBehaviour
     }
 
     void Update()
-    {
+    {   
+        //enable the main menu
+        if (Input.GetButtonDown(OK_Button) && !main_menu_is_active)
+        {
+            HideMenu(); //hide any open object menu
+
+            movement_is_constrained = true;
+
+            mainMenu.SetActive(true);
+
+            main_menu_is_active = true;
+
+            //set to first button in the menu
+            mainMenuController.currentIndex = 0;
+            mainMenuController.HighlightButton(0);
+        }
+
         // Get the position of the sphere named "raycast_origin"
         Vector3 rayOrigin = GameObject.Find("raycast_origin").transform.position;
 
@@ -55,7 +77,7 @@ public class RaycastInteractionManager : MonoBehaviour
 
         // Perform the raycast
         RaycastHit hit;
-        if (Physics.Raycast(rayOrigin, rayDirection, out hit, maxDistance, myLayerMask1))
+        if (Physics.Raycast(rayOrigin, rayDirection, out hit, maxDistance, myLayerMask1) && !main_menu_is_active)
         {
             // If the raycast hits something, draw the line to the hit point
             lineRenderer.enabled = true;
@@ -117,7 +139,7 @@ public class RaycastInteractionManager : MonoBehaviour
 
         }
         //if it hits the plane/ground
-        else if (Physics.Raycast(rayOrigin, rayDirection, out hit, maxDistance, myLayerMask2))
+        else if (Physics.Raycast(rayOrigin, rayDirection, out hit, maxDistance, myLayerMask2) && !main_menu_is_active)
         {
             // If the raycast hits something, draw the line to the hit point
             lineRenderer.enabled = true;
@@ -162,7 +184,7 @@ public class RaycastInteractionManager : MonoBehaviour
 
         }
         //if it hits any other gameobject
-        else if (Physics.Raycast(rayOrigin, rayDirection, out hit, maxDistance))
+        else if (Physics.Raycast(rayOrigin, rayDirection, out hit, maxDistance) && !main_menu_is_active)
         {
             // If the raycast hits something, draw the line to the hit point
             lineRenderer.enabled = true;
@@ -181,7 +203,7 @@ public class RaycastInteractionManager : MonoBehaviour
             }
 
         }
-        else
+        else if (!main_menu_is_active)
         {
             // If the raycast doesn't hit anything, draw the line to the maximum distance
             Vector3 rayEnd = rayOrigin + rayDirection * maxDistance;
