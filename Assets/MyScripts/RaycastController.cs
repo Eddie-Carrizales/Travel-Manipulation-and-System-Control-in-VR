@@ -1,18 +1,44 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class RaycastController : MonoBehaviour
 {
     public float maxDistance = 10f;
-    public LayerMask myLayerMask;
+    private LayerMask myLayerMask1;
+    private LayerMask myLayerMask2;
     public LineRenderer lineRenderer;
-    public float distanceFromCamera = 0.2f; // Distance from camera to start the raycast
     private Outline outline_component;
+
+    public GameObject menuCanvasPrefab;
+    private GameObject menuCanvasInstance;
+    private GameObject lastSelectedObject;
+    private Button lastHighlightedButton;
+    private GameObject character;
+
+    private GameObject copiedObject; // Reference to the copied object
+
+    private bool menu_is_active = false;
+
+    //Mappings
+    //CURRENT CONFIGURATION = MAC
+    private string X_Button = "js11";
+    private string Y_Button = "js5";
+    private string A_Button = "js7"; //trigger button
+    private string B_Button = "js10";
+
+    //CURRENT CONFIGURATION = Android
+    //private string X_Button = "js2";
+    //private string Y_Button = "js3";
+    //private string A_Button = "js10";
+    //private string B_Button = "js5";
 
    void Start()
     {
-        myLayerMask = LayerMask.GetMask("raycast_objects");
+        myLayerMask1 = LayerMask.GetMask("raycast_objects");
+        myLayerMask2 = LayerMask.GetMask("ground");
+        character = GameObject.Find("Character");
     }
 
     void Update()
@@ -25,14 +51,14 @@ public class RaycastController : MonoBehaviour
 
         // Perform the raycast
         RaycastHit hit;
-        if (Physics.Raycast(rayOrigin, rayDirection, out hit, maxDistance, myLayerMask))
+        if (Physics.Raycast(rayOrigin, rayDirection, out hit, maxDistance, myLayerMask1))
         {
             // If the raycast hits something, draw the line to the hit point
             lineRenderer.enabled = true;
             lineRenderer.SetPosition(0, rayOrigin);
             lineRenderer.SetPosition(1, hit.point);
 
-            Debug.Log("Raycast hit: " + hit.collider.gameObject.name);
+            Debug.Log("Raycast1 hit: " + hit.collider.gameObject.name);
 
             // Get the GameObject that the raycast hits
             GameObject hitObject = hit.collider.gameObject;
@@ -47,7 +73,103 @@ public class RaycastController : MonoBehaviour
                 // For example, you can access its properties or call its methods
                 Debug.Log("Found the component!");
                 outline_component.enabled = true;
+
+
+                //open a menu for object selected
+                if (Input.GetButtonDown(X_Button))
+                {
+                    //Debug.Log("X_Button Pressed");
+                    //open a menu next to object
+                    ShowMenu(hit.point);
+
+                    lastSelectedObject = hitObject;
+
+                }
             }
+
+            //If a menu is open and we can use button B to select a button
+            if (menu_is_active)
+            {
+                Debug.Log("menu is active");
+                //click menu button
+
+                // Check if the hit object has a Button component
+                Button button = hitObject.GetComponent<Button>();
+                if (button != null)
+                {
+                    Debug.Log("button hit");
+                    // Highlight the button
+                    HighlightButton(button);
+
+                    // Check if the input button is pressed
+                    if (Input.GetButtonDown(B_Button))
+                    {
+                        // Simulate a click on the highlighted button
+                        Debug.Log("button clicked");
+                        button.onClick.Invoke();
+                    }
+                }
+            }
+
+        }
+        //if it hits the plane/ground
+        else if (Physics.Raycast(rayOrigin, rayDirection, out hit, maxDistance, myLayerMask2))
+        {
+            // If the raycast hits something, draw the line to the hit point
+            lineRenderer.enabled = true;
+            lineRenderer.SetPosition(0, rayOrigin);
+            lineRenderer.SetPosition(1, hit.point);
+
+            Debug.Log("Raycast2 hit: " + hit.collider.gameObject.name);
+
+            // Get the GameObject that the raycast hits
+            GameObject hitObject = hit.collider.gameObject;
+
+            //paste the last copied object
+            if (!menu_is_active && Input.GetButtonDown(A_Button))
+            {
+                //paste last copied object
+                PasteObject(hit.point);
+            }
+
+            //teleports to that location on the ground
+            if (Input.GetButtonDown(Y_Button) && character != null)
+            {
+                Debug.Log("teleported");
+
+                //telepor to location
+                character.transform.position = hit.point;
+            }
+
+            // Disable the outline components previously enabled
+            DisableAllOutlines();
+
+            // If no object is hit, unhighlight the last highlighted button
+            if (lastHighlightedButton != null)
+            {
+                UnhighlightButton(lastHighlightedButton);
+            }
+
+        }
+        //if it hits any other gameobject
+        else if (Physics.Raycast(rayOrigin, rayDirection, out hit, maxDistance))
+        {
+            // If the raycast hits something, draw the line to the hit point
+            lineRenderer.enabled = true;
+            lineRenderer.SetPosition(0, rayOrigin);
+            lineRenderer.SetPosition(1, hit.point);
+
+            Debug.Log("Raycast3 hit: " + hit.collider.gameObject.name);
+
+            // Disable the outline components previously enabled
+            DisableAllOutlines();
+
+            // If no object is hit, unhighlight the last highlighted button
+            if (lastHighlightedButton != null)
+            {
+                UnhighlightButton(lastHighlightedButton);
+            }
+
         }
         else
         {
@@ -57,12 +179,141 @@ public class RaycastController : MonoBehaviour
             lineRenderer.SetPosition(0, rayOrigin);
             lineRenderer.SetPosition(1, rayEnd);
 
-            // Disable the outline component if it was previously enabled
-            if (outline_component != null)
+            // Disable the outline components previously enabled
+            DisableAllOutlines();
+
+            // If no object is hit, unhighlight the last highlighted button
+            if (lastHighlightedButton != null)
             {
-                outline_component.enabled = false;
+                UnhighlightButton(lastHighlightedButton);
             }
         }
+    }
+
+    void PasteObject(Vector3 position)
+    {
+        // Instantiate a copy of the copied object at the hit point
+        GameObject instance = Instantiate(copiedObject, position, Quaternion.identity);
+
+        // enable the object, this is done for when cut made it invisible
+        instance.SetActive(true);
+    }
+
+    // Method to highlight the button
+    void HighlightButton(Button button)
+    {
+        // Unhighlight the last highlighted button
+        if (lastHighlightedButton != null)
+        {
+            UnhighlightButton(lastHighlightedButton);
+        }
+
+        // Highlight the new button
+        ColorBlock colors = button.colors;
+        colors.normalColor = Color.yellow;
+        button.colors = colors;
+
+        lastHighlightedButton = button;
+    }
+
+    // Method to unhighlight the button
+    void UnhighlightButton(Button button)
+    {
+        ColorBlock colors = button.colors;
+        colors.normalColor = Color.white;
+        button.colors = colors;
+
+        lastHighlightedButton = null;
+    }
+
+    void ShowMenu(Vector3 position)
+    {
+        // Ensure only one menu is active at a time
+        HideMenu();
+
+        // Instantiate the menu canvas prefab
+        menuCanvasInstance = Instantiate(menuCanvasPrefab, position, Quaternion.identity);
+
+        // Position the menu canvas near the object
+        menuCanvasInstance.transform.position = position + new Vector3(0, 1, 0); // Adjust position as needed
+
+        //enable menu button box colliders this is to fix button highlighting bug
+        // Enable interaction components after a delay
+        StartCoroutine(EnableMenuButtonCollidersAfterDelay());
+
+        //lock character movement, can only move head until menu is closed
+    }
+
+    IEnumerator EnableMenuButtonCollidersAfterDelay()
+    {
+        // Wait for a certain delay
+        yield return new WaitForSeconds(0.5f); // Adjust the delay as needed
+
+        // Enable collider for all button objects
+        Collider[] colliders = menuCanvasInstance.GetComponentsInChildren<Collider>(true);
+        foreach (Collider collider in colliders)
+        {
+            collider.enabled = true;
+        }
+
+        // Set menu as active
+        menu_is_active = true;
+    }
+
+    void HideMenu()
+    {
+        // Destroy any existing menu canvas instance
+        if (menuCanvasInstance != null)
+        {
+            Destroy(menuCanvasInstance);
+        }
+
+        menu_is_active = false;
+    }
+
+    //public functions for the menus
+    public void CopyObject()
+    {
+
+        //the last object we pressed x on is the one we save for copying
+        copiedObject = lastSelectedObject;
+
+        //we close the menu open
+        HideMenu();
+    }
+
+    public void CutObject()
+    {
+        //the last object we pressed x on is the one we save for copying
+        //the las object we pressed x on is the one we save for later copying
+        copiedObject = lastSelectedObject;
+
+        // Hide the last selected object
+        lastSelectedObject.SetActive(false);
+
+        // we set menu count to 0
+        menu_is_active = true;
+
+        //we close the menu open
+        HideMenu();
+    }
+
+    void DisableAllOutlines()
+    {
+        // Disable all outlines in the scene
+        Outline[] outlines = FindObjectsOfType<Outline>();
+        foreach (Outline outline in outlines)
+        {
+            outline.enabled = false;
+        }
+    }
+
+    public void ExitMenu()
+    {
+        //we destroy the instantiated menu
+        HideMenu();
+
+        //allow character movement again
     }
 
 }
