@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class RaycastController : MonoBehaviour
+public class RaycastInteractionManager : MonoBehaviour
 {
     public float maxDistance = 10f;
     private LayerMask myLayerMask1;
@@ -16,8 +16,12 @@ public class RaycastController : MonoBehaviour
     private GameObject lastSelectedObject;
     private Button lastHighlightedButton;
     private GameObject character;
+    private bool is_cutting = false;
+    private bool is_teleporting = false;
+    public bool movement_is_constrained = false;
 
     private GameObject copiedObject; // Reference to the copied object
+    private GameObject cutObject; // Reference to the cut object
 
     private bool menu_is_active = false;
 
@@ -128,17 +132,23 @@ public class RaycastController : MonoBehaviour
             //paste the last copied object
             if (!menu_is_active && Input.GetButtonDown(A_Button))
             {
-                //paste last copied object
-                PasteObject(hit.point);
+                if (is_cutting)
+                {
+                    PasteCutObject(hit.point);
+                }
+                else
+                {
+                    //paste last copied object
+                    PasteCopiedObject(hit.point);
+                }
             }
 
             //teleports to that location on the ground
-            if (Input.GetButtonDown(Y_Button) && character != null)
+            if (Input.GetButtonDown(Y_Button) && !is_teleporting && !movement_is_constrained)
             {
                 Debug.Log("teleported");
 
-                //telepor to location
-                character.transform.position = hit.point;
+                StartCoroutine(TeleportCoroutine(hit.point));
             }
 
             // Disable the outline components previously enabled
@@ -190,12 +200,16 @@ public class RaycastController : MonoBehaviour
         }
     }
 
-    void PasteObject(Vector3 position)
+    void PasteCutObject(Vector3 position)
+    {
+        cutObject.transform.position = position;
+        cutObject.SetActive(true);
+    }
+
+    void PasteCopiedObject(Vector3 position)
     {
         // Instantiate a copy of the copied object at the hit point
         GameObject instance = Instantiate(copiedObject, position, Quaternion.identity);
-
-        // enable the object, this is done for when cut made it invisible
         instance.SetActive(true);
     }
 
@@ -242,6 +256,7 @@ public class RaycastController : MonoBehaviour
         StartCoroutine(EnableMenuButtonCollidersAfterDelay());
 
         //lock character movement, can only move head until menu is closed
+        movement_is_constrained = true;
     }
 
     IEnumerator EnableMenuButtonCollidersAfterDelay()
@@ -269,6 +284,8 @@ public class RaycastController : MonoBehaviour
         }
 
         menu_is_active = false;
+
+        movement_is_constrained = false;
     }
 
     //public functions for the menus
@@ -280,13 +297,17 @@ public class RaycastController : MonoBehaviour
 
         //we close the menu open
         HideMenu();
+
+        is_cutting = false;
     }
 
     public void CutObject()
     {
+        is_cutting = true;
+
         //the last object we pressed x on is the one we save for copying
         //the las object we pressed x on is the one we save for later copying
-        copiedObject = lastSelectedObject;
+        cutObject = lastSelectedObject;
 
         // Hide the last selected object
         lastSelectedObject.SetActive(false);
@@ -314,6 +335,36 @@ public class RaycastController : MonoBehaviour
         HideMenu();
 
         //allow character movement again
+        movement_is_constrained = false;
+    }
+
+    //teleports to the position
+    IEnumerator TeleportCoroutine(Vector3 position)
+    {
+
+        is_teleporting = true;
+
+        // prevents character from clipping below ground
+        var characterHeightOffset =  1.0f;
+
+        //add an offset to prevent character from clipping below plane
+        Vector3 finalPosition = position + Vector3.up * characterHeightOffset;
+
+        float elapsedTime = 0;
+
+        //Added this re-teleportation timer becuase it kept skiping the teleportation code
+        //maybe MAC problem, but I will keep the code just in case.
+        while (elapsedTime < 0.1f)
+        {
+            character.transform.position = finalPosition;
+            elapsedTime += Time.deltaTime;
+            yield return null;
+        }
+
+        //sets object position to currentSphere which is being poited at.
+        character.transform.position = finalPosition;
+
+        is_teleporting = false;
     }
 
 }

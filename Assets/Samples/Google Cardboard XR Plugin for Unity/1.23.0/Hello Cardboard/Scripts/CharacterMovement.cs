@@ -12,6 +12,8 @@ public class CharacterMovement : MonoBehaviour
     [Tooltip("Should be checked if using the Bluetooth Controller to move. If using keyboard, leave this unchecked.")]
     public bool joyStickMode;
 
+    public RaycastInteractionManager raycastInteractionManager;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -21,9 +23,12 @@ public class CharacterMovement : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
         //Get horizontal and Vertical movements
         float horComp = Input.GetAxis("Horizontal");
         float vertComp = Input.GetAxis("Vertical");
+
+        bool movement_is_constrained = raycastInteractionManager.movement_is_constrained;
 
         if (joyStickMode)
         {
@@ -31,8 +36,9 @@ public class CharacterMovement : MonoBehaviour
             vertComp = Input.GetAxis("Horizontal") * -1;
         }
 
+        //movement vector
         Vector3 moveVect = Vector3.zero;
-
+        
         //Get look Direction
         Vector3 cameraLook = cameraObj.transform.forward;
         cameraLook.y = 0f;
@@ -41,14 +47,17 @@ public class CharacterMovement : MonoBehaviour
         Vector3 forwardVect = cameraLook;
         Vector3 rightVect = Vector3.Cross(forwardVect, Vector3.up).normalized * -1;
 
-        moveVect += rightVect * horComp;
-        moveVect += forwardVect * vertComp;
+        //if the movement is not constrained, then allow movement, else, then it will be zero.
+        if (!movement_is_constrained)
+        {
+            //allow movement
+            moveVect += rightVect * horComp;
+            moveVect += forwardVect * vertComp;
 
-        moveVect *= speed;
-     
+            moveVect *= speed;
+        }
 
         charCntrl.SimpleMove(moveVect);
-
 
     }
 }

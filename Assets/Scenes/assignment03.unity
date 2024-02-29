@@ -1244,7 +1244,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 12
+  m_RootOrder: 10
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &348910576
 GameObject:
@@ -1257,7 +1257,6 @@ GameObject:
   - component: {fileID: 348910579}
   - component: {fileID: 348910578}
   - component: {fileID: 348910577}
-  - component: {fileID: 348910580}
   m_Layer: 0
   m_Name: Character
   m_TagString: Untagged
@@ -1280,6 +1279,7 @@ MonoBehaviour:
   speed: 5
   cameraObj: {fileID: 439141858}
   joyStickMode: 1
+  raycastInteractionManager: {fileID: 1537331944}
 --- !u!143 &348910578
 CharacterController:
   m_ObjectHideFlags: 0
@@ -1315,19 +1315,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 182.732, z: 0}
---- !u!114 &348910580
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 348910576}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 689b1207572bf4ab68c467350c1f4766, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  isColliding: 0
 --- !u!1 &366506990 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 191266, guid: c44bd9bdc114d4a60932c0087d9d1732, type: 3}
@@ -2030,7 +2017,7 @@ Transform:
   - {fileID: 1529434185}
   - {fileID: 1679571828}
   m_Father: {fileID: 0}
-  m_RootOrder: 10
+  m_RootOrder: 11
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &535013477
 GameObject:
@@ -2072,7 +2059,8 @@ Transform:
   m_LocalPosition: {x: -1.4696641, y: -14.590932, z: 16.07077}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children: []
+  m_Children:
+  - {fileID: 1869532947}
   m_Father: {fileID: 0}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -2784,7 +2772,6 @@ GameObject:
   m_Component:
   - component: {fileID: 835903367}
   - component: {fileID: 835903369}
-  - component: {fileID: 835903368}
   m_Layer: 0
   m_Name: LineRenderer
   m_TagString: Untagged
@@ -2807,21 +2794,6 @@ Transform:
   m_Father: {fileID: 1537331943}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &835903368
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 835903366}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0c7b2d262185e48179ec74ee9b795f0d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxDistance: 10
-  lineRenderer: {fileID: 835903369}
-  menuCanvasPrefab: {fileID: 8157027599213168027}
 --- !u!120 &835903369
 LineRenderer:
   m_ObjectHideFlags: 0
@@ -4664,8 +4636,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1537331943}
+  - component: {fileID: 1537331944}
   m_Layer: 0
-  m_Name: RaycastManager
+  m_Name: RaycastInteractionManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -4684,9 +4657,26 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 835903367}
+  - {fileID: 4291019822783886631}
   m_Father: {fileID: 0}
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1537331944
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1537331942}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0c7b2d262185e48179ec74ee9b795f0d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxDistance: 10
+  lineRenderer: {fileID: 835903369}
+  menuCanvasPrefab: {fileID: 8157027599213168027}
+  movement_is_constrained: 0
 --- !u!1001 &1618608150
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -5623,13 +5613,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1869532946}
   m_LocalRotation: {x: -0, y: 0.9997159, z: -0, w: -0.023837512}
-  m_LocalPosition: {x: -6.33, y: 2.8600001, z: -8.1}
+  m_LocalPosition: {x: -4.860336, y: 17.450932, z: -24.17077}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1758400913}
-  m_Father: {fileID: 0}
-  m_RootOrder: 14
+  m_Father: {fileID: 535013479}
+  m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1904533764
 PrefabInstance:
@@ -6099,7 +6089,7 @@ Transform:
   - {fileID: 1970400627}
   - {fileID: 838357742}
   m_Father: {fileID: 0}
-  m_RootOrder: 11
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2056527784
 MonoBehaviour:
@@ -7428,13 +7418,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8157027599213168027}
   m_LocalRotation: {x: -0, y: 0.9997159, z: -0, w: -0.023837512}
-  m_LocalPosition: {x: -19, y: 383, z: 141}
+  m_LocalPosition: {x: -281.88345, y: 488.0077, z: 154.65112}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 9159563839210519339}
-  m_Father: {fileID: 0}
-  m_RootOrder: 13
+  m_Father: {fileID: 1537331943}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &4589960912171420532
 MonoBehaviour:
@@ -7863,8 +7853,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 835903368}
-        m_TargetAssemblyTypeName: RaycastController, Assembly-CSharp
+      - m_Target: {fileID: 1537331944}
+        m_TargetAssemblyTypeName: RaycastInteractionManager, Assembly-CSharp
         m_MethodName: CopyObject
         m_Mode: 1
         m_Arguments:
@@ -7939,8 +7929,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 835903368}
-        m_TargetAssemblyTypeName: RaycastController, Assembly-CSharp
+      - m_Target: {fileID: 1537331944}
+        m_TargetAssemblyTypeName: RaycastInteractionManager, Assembly-CSharp
         m_MethodName: ExitMenu
         m_Mode: 1
         m_Arguments:
@@ -9476,8 +9466,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 835903368}
-        m_TargetAssemblyTypeName: RaycastController, Assembly-CSharp
+      - m_Target: {fileID: 1537331944}
+        m_TargetAssemblyTypeName: RaycastInteractionManager, Assembly-CSharp
         m_MethodName: CutObject
         m_Mode: 1
         m_Arguments:
