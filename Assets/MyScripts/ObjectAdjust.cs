@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CanvasAdjust : MonoBehaviour
+public class ObjectAdjust : MonoBehaviour
 {   
     //Our variables
     private Camera mainCamera;
@@ -20,23 +20,21 @@ public class CanvasAdjust : MonoBehaviour
         }
 
         // Call to function
-        AdjustCanvas();
+        AdjustObject();
     }
 
     void Update()
     {
-        // Call to function so it keeps adjusting the canvas
-        AdjustCanvas();
+
     }
 
     //This function will adjust our canvas so that it is facing the user
-    void AdjustCanvas()
+    void AdjustObject()
     {
         //Calculate the direction
         Vector3 directionToCamera = mainCamera.transform.position - transform.position;
 
-        // Make the canvas face the camera (the quaternon only allows it to move in x and z so that it stays upright)
+        // Make the object face the camera (the quaternon only allows it to move in x and z so that it stays upright)
         transform.rotation = Quaternion.LookRotation(directionToCamera, Vector3.up) * Quaternion.Euler(0, 180, 0);
     }
 }
-

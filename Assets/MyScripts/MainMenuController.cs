@@ -6,18 +6,23 @@ using TMPro;
 
 public class MainMenuController : MonoBehaviour
 {   
-    //text components
+    //--Variables Used--
+
+    //Scripts referenced
+    public RaycastInteractionManager raycastInteractionManager;
+    public CharacterMovement characterMovement;
+
+    //Menu variables
+    public Button[] menuButtons;
     public TMP_Text raycast_length;
     public TMP_Text speed;
     public string newText = "";
 
-    public Button[] menuButtons;
+
+    //Other variables
     public int currentIndex = 0;
     private float previousVerticalInput = 0f;
     public float inputThreshold = 0.3f; // Threshold value for considering input as zero
-
-    public RaycastInteractionManager raycastInteractionManager;
-    public CharacterMovement characterMovement;
 
     //For MAC
     private string B_Button = "js10";
@@ -25,69 +30,96 @@ public class MainMenuController : MonoBehaviour
     //FOR ANDROID
     //private string B_Button = "js10";
 
-    // Start is called before the first frame update
     void Start()
     {
 
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (raycastInteractionManager.main_menu_is_active)
-        {
-            float verticalInput = Input.GetAxis("Vertical");
 
-            // Check if vertical input has returned to zero from a previous non-zero value
+    void Update()
+    {   
+        //Only allow controller manipulation is the menu is active
+        if (raycastInteractionManager.main_menu_is_active)
+        {   
+            //Get the controller joystick vertical axis
+            float verticalInput = Input.GetAxis("Vertical");
+            
+            //---Here I made it so that joystick functions as a D-pad--
+
+            // This if just checks if the input has come back to its original position, before considering more input
             if (Mathf.Abs(previousVerticalInput) > inputThreshold && Mathf.Abs(verticalInput) <= inputThreshold)
-            {
-                previousVerticalInput = 0f; // Reset previous input value
-                return; // Exit Update without further handling input
+            {   
+                //reset the previous
+                previousVerticalInput = 0f;
+                return;
             }
 
-            // If vertical input is positive or negative and the previous input was zero
+            // --These conditions check if joystick input is positive or negative (for up and down)--
+
+            // If vertical input is positive and previous was 0 (Note also added a thershold so that its more sensitive and doenst have to go back exactly to 0)
             if (verticalInput > inputThreshold && Mathf.Abs(previousVerticalInput) <= inputThreshold)
             {
-                // Move selection up
-                currentIndex = (currentIndex == 0) ? menuButtons.Length - 1 : currentIndex - 1;
-                HighlightButton(currentIndex);
-                previousVerticalInput = verticalInput; // Set previous input to current input
+                // moves to the button above
+                if (currentIndex == 0)
+                {
+                    currentIndex = menuButtons.Length - 1;
+                }
+                else
+                {
+                    currentIndex--;
+                }
+
+                //Highlight the current button
+                HighlightButton(currentIndex); 
+                previousVerticalInput = verticalInput; // set previous to our current input
             }
+            // If vertical input is negative and previous was 0 (Note also added a thershold so that its more sensitive and doenst have to go back exactly to 0)
             else if (verticalInput < -inputThreshold && Mathf.Abs(previousVerticalInput) <= inputThreshold)
             {
-                // Move selection down
-                currentIndex = (currentIndex == menuButtons.Length - 1) ? 0 : currentIndex + 1;
+                // moves to the button below
+                if (currentIndex == menuButtons.Length - 1)
+                {
+                    currentIndex = 0;
+                }
+                else
+                {
+                    currentIndex++;
+                }
+
+                //Highlight the current button
                 HighlightButton(currentIndex);
-                previousVerticalInput = verticalInput; // Set previous input to current input
+                previousVerticalInput = verticalInput; // set previous to our current input
             }
 
-            // Check for button press (you can use any button here, like "Submit")
+            // We use the B button to select
             if (Input.GetButtonDown(B_Button))
             {
-                // Perform action associated with the selected button
-                menuButtons[currentIndex].onClick.Invoke();
+                menuButtons[currentIndex].onClick.Invoke(); // clicks the current button
             }
 
         }
     }
 
+    //Function to resume interactions
     public void Resume()
     {
-        //restores virtual environment interactions -> we can add a bool to raycast if conditions so that raycast cannot do anything
+        //restores the virtual environment interactions
         raycastInteractionManager.main_menu_is_active = false;
         
-        //enables character movement -> change bool
+        //enables character movement -> set constrained to false
         raycastInteractionManager.movement_is_constrained = false;
 
         //hide main menu -> set active false
         raycastInteractionManager.mainMenu.SetActive(false);
     }
 
+    //We use this function to toggle between raycast lengths
     public void Change_Raycast_Length()
     {
+        //Get the current max distance from the other script
         float currentLength = raycastInteractionManager.maxDistance;
 
-        // Toggle between length options
+        // toggle between lengths (1, 10, 50)
         if (currentLength == 1.0f)
         {
             //set length to 10m
@@ -112,11 +144,13 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
+    //We use this function to toggle between character speeds
     public void Change_Character_Speed()
-    {
+    {   
+        //Get the current speed from the other script
         float currentSpeed = characterMovement.speed;
 
-        // Toggle between speed options
+        // toggle between speeds (low, medium, high)
         if (currentSpeed == 5.0f)
         {
             //set speed to medium
@@ -140,14 +174,23 @@ public class MainMenuController : MonoBehaviour
         }
     }
 
+    // stops or quits the game
     public void Quit_Game()
     {
-
+        // Quit the application
+        #if UNITY_EDITOR
+            //Stop play mode
+            UnityEditor.EditorApplication.isPlaying = false;
+        #else
+            //quit app
+            Application.Quit();
+        #endif
     }
 
+    // function to highlight the color at the current index
     public void HighlightButton(int index)
     {
-        // Reset all buttons to normal state
+        // reset all the buttons in the menu to normal color
         foreach (Button button in menuButtons)
         {
             ColorBlock colors = button.colors;
@@ -155,9 +198,13 @@ public class MainMenuController : MonoBehaviour
             button.colors = colors;
         }
 
-        // Highlight the selected button
-        ColorBlock selectedColors = menuButtons[index].colors;
-        selectedColors.normalColor = Color.yellow; // Change this color as needed
-        menuButtons[index].colors = selectedColors;
+        // -highlight the button at current index-
+
+        // Get the button color
+        ColorBlock buttonColor = menuButtons[index].colors;
+
+        //change the button color
+        buttonColor.normalColor = Color.blue;
+        menuButtons[index].colors = buttonColor;
     }
 }

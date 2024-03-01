@@ -21,7 +21,7 @@ public class CharacterMovement : MonoBehaviour
         speed = 5.0f;
     }
 
-    // Update is called once per frame
+    // Update is called once per frames
     void Update()
     {
         bool movement_is_constrained = raycastInteractionManager.movement_is_constrained;
