@@ -38,18 +38,18 @@ public class RaycastInteractionManager : MonoBehaviour
 
     //----Button Mappings----
     //CURRENT CONFIGURATION = MAC
-    private string X_Button = "js11";
-    private string Y_Button = "js5";
-    private string A_Button = ""; 
-    private string B_Button = "js10";
-    private string OK_Button = "js7";
+    // private string X_Button = "js11";
+    // private string Y_Button = "js5";
+    // private string A_Button = ""; 
+    // private string B_Button = "js10";
+    // private string OK_Button = "js7";
 
     //CURRENT CONFIGURATION = Android
-    //private string X_Button = "js2";
-    //private string Y_Button = "js3";
-    //private string A_Button = "js10";
-    //private string B_Button = "js5";
-    //private string OK_Button = "";
+    private string X_Button = "js2";
+    private string Y_Button = "js3";
+    private string A_Button = "js10";
+    public string B_Button = "js5";
+    private string OK_Button = "";
 
    void Start()
     {   

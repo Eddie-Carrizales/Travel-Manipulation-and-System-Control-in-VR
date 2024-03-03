@@ -25,12 +25,6 @@ public class MainMenuController : MonoBehaviour
     private float navigationThreshold = 0.5f; // threshold to detect joystick movement
     private float selectionCooldown = 0.5f; // cooldown between button selections
 
-    //For MAC
-    private string B_Button = "js10";
-
-    //FOR ANDROID
-    //private string B_Button = "js10";
-
     void Start()
     {
 
@@ -61,7 +55,7 @@ public class MainMenuController : MonoBehaviour
             }
 
             // We use the B button to select a button
-            if (Input.GetButtonDown(B_Button))
+            if (Input.GetButtonDown(raycastInteractionManager.B_Button))
             {
                 menuButtons[currentIndex].onClick.Invoke(); // clicks the current button
             }
