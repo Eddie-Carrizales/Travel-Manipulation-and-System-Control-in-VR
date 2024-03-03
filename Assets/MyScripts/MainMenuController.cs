@@ -20,9 +20,10 @@ public class MainMenuController : MonoBehaviour
 
 
     //Other variables
-    public int currentIndex = 0;
-    private float previousVerticalInput = 0f;
-    public float inputThreshold = 0.3f; // Threshold value for considering input as zero
+    public int currentIndex = 0; // current selected button
+    private bool canNavigate = true;
+    private float navigationThreshold = 0.5f; // threshold to detect joystick movement
+    private float selectionCooldown = 0.5f; // cooldown between button selections
 
     //For MAC
     private string B_Button = "js10";
@@ -43,61 +44,61 @@ public class MainMenuController : MonoBehaviour
         {   
             //Get the controller joystick vertical axis
             float verticalInput = Input.GetAxis("Vertical");
-            
-            //---Here I made it so that joystick functions as a D-pad--
 
-            // This if just checks if the input has come back to its original position, before considering more input
-            if (Mathf.Abs(previousVerticalInput) > inputThreshold && Mathf.Abs(verticalInput) <= inputThreshold)
-            {   
-                //reset the previous
-                previousVerticalInput = 0f;
-                return;
-            }
-
-            // --These conditions check if joystick input is positive or negative (for up and down)--
-
-            // If vertical input is positive and previous was 0 (Note also added a thershold so that its more sensitive and doenst have to go back exactly to 0)
-            if (verticalInput > inputThreshold && Mathf.Abs(previousVerticalInput) <= inputThreshold)
+            // --These conditions check if joystick input is greater than our threshold (for up and down), and our cooldown is done--
+            if (Mathf.Abs(verticalInput) > navigationThreshold && canNavigate)
             {
-                // moves to the button above
-                if (currentIndex == 0)
+                // select button up or down based on direction of joystick (positive or negative)
+                if (verticalInput > 0)
                 {
-                    currentIndex = menuButtons.Length - 1;
+                    //note: we needed coroutines due to update function
+                    StartCoroutine(NavigateOption(currentIndex - 1));
                 }
-                else
+                else if (verticalInput < 0)
                 {
-                    currentIndex--;
+                    StartCoroutine(NavigateOption(currentIndex + 1));
                 }
-
-                //Highlight the current button
-                HighlightButton(currentIndex); 
-                previousVerticalInput = verticalInput; // set previous to our current input
-            }
-            // If vertical input is negative and previous was 0 (Note also added a thershold so that its more sensitive and doenst have to go back exactly to 0)
-            else if (verticalInput < -inputThreshold && Mathf.Abs(previousVerticalInput) <= inputThreshold)
-            {
-                // moves to the button below
-                if (currentIndex == menuButtons.Length - 1)
-                {
-                    currentIndex = 0;
-                }
-                else
-                {
-                    currentIndex++;
-                }
-
-                //Highlight the current button
-                HighlightButton(currentIndex);
-                previousVerticalInput = verticalInput; // set previous to our current input
             }
 
-            // We use the B button to select
+            // We use the B button to select a button
             if (Input.GetButtonDown(B_Button))
             {
                 menuButtons[currentIndex].onClick.Invoke(); // clicks the current button
             }
 
         }
+    }
+
+    //method used by coroutine due to the update loop
+    //this will work as sort of a cooldown and will also loop our button selection
+    IEnumerator NavigateOption(int newIndex)
+    {
+        // We will prevent navigation until cooldown ends
+        canNavigate = false;
+
+        // condition to loop the button selection 
+        if (newIndex < 0)
+        {
+            //go to the last option
+            newIndex = menuButtons.Length - 1;
+        }
+        else if (newIndex >= menuButtons.Length)
+        {
+            //go to the first option
+            newIndex = 0;
+        }
+
+        // Highlight the new selected option
+        HighlightButton(newIndex);
+
+        // update our index
+        currentIndex = newIndex;
+
+        // wait for cooldown to end
+        yield return new WaitForSeconds(selectionCooldown);
+
+        // allow navigation again
+        canNavigate = true;
     }
 
     //Function to resume interactions
@@ -203,8 +204,9 @@ public class MainMenuController : MonoBehaviour
         // Get the button color
         ColorBlock buttonColor = menuButtons[index].colors;
 
-        //change the button color
-        buttonColor.normalColor = Color.blue;
+        //change the button color to orange
+        Color orange = new Color(1f, 0.5f, 0f, 1f);
+        buttonColor.normalColor = orange;
         menuButtons[index].colors = buttonColor;
     }
 }

@@ -14,11 +14,18 @@ public class CharacterMovement : MonoBehaviour
 
     public RaycastInteractionManager raycastInteractionManager;
 
+    //variables to lock camera rotation
+    private Quaternion originalRotation;
+    private bool menuWasActive = false;
+
     // Start is called before the first frame update
     void Start()
     {
         charCntrl = GetComponent<CharacterController>();
         speed = 5.0f;
+
+        // save the original rotation of the camera
+        originalRotation = cameraObj.transform.localRotation;
     }
 
     // Update is called once per frames
@@ -27,15 +34,26 @@ public class CharacterMovement : MonoBehaviour
         bool movement_is_constrained = raycastInteractionManager.movement_is_constrained;
         bool main_menu_is_active = raycastInteractionManager.main_menu_is_active;
 
-        float horComp = 0f;
-        float vertComp = 0f;
+        //Get horizontal and Vertical movements
+        float horComp = Input.GetAxis("Horizontal");
+        float vertComp = Input.GetAxis("Vertical");
 
-        //if main menu is not active, look around normaly, else it stays locked
-        if (!main_menu_is_active)
+        // conditionals to save original camera rotation only when main menu becomes active
+        if (menuWasActive != main_menu_is_active)
         {
-            //Get horizontal and Vertical movements
-            horComp = Input.GetAxis("Horizontal");
-            vertComp = Input.GetAxis("Vertical");
+            if (main_menu_is_active)
+            {
+                // save rotation of camera
+                originalRotation = cameraObj.transform.localRotation;
+            }
+            menuWasActive = main_menu_is_active;
+        }
+
+        //while the main menu is active, we will lock the camera rotation
+        if (main_menu_is_active)
+        {
+            // reset camera rotation to its original rotation
+            cameraObj.transform.localRotation = originalRotation;
         }
 
         if (joyStickMode)

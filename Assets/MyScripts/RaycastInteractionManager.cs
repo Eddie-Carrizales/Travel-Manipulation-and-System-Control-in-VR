@@ -266,7 +266,8 @@ public class RaycastInteractionManager : MonoBehaviour
 
         // Highlight the new button
         ColorBlock colors = button.colors;
-        colors.normalColor = Color.blue;
+        Color orange = new Color(1f, 0.5f, 0f, 1f);
+        colors.normalColor = orange;
         button.colors = colors;
 
         //save last highlighted button
