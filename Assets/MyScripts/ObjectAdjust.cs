@@ -28,13 +28,15 @@ public class ObjectAdjust : MonoBehaviour
 
     }
 
-    //This function will adjust our canvas so that it is facing the user
+    //This method will adjust our object to that when we are going to place the object, it faces the user.
     void AdjustObject()
     {
         //Calculate the direction
         Vector3 directionToCamera = mainCamera.transform.position - transform.position;
 
-        // Make the object face the camera (the quaternon only allows it to move in x and z so that it stays upright)
-        transform.rotation = Quaternion.LookRotation(directionToCamera, Vector3.up) * Quaternion.Euler(0, 180, 0);
+        // Make the object you are going to place face the camera, so it will only rotate around y-axis
+        Quaternion targetRotation = Quaternion.LookRotation(directionToCamera, Vector3.up);
+        Vector3 eulerRotation = targetRotation.eulerAngles;
+        transform.rotation = Quaternion.Euler(0, eulerRotation.y, 0);
     }
 }

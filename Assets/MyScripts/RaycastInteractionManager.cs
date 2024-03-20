@@ -49,7 +49,7 @@ public class RaycastInteractionManager : MonoBehaviour
     private string Y_Button = "js3";
     private string A_Button = "js10";
     public string B_Button = "js5";
-    private string OK_Button = "";
+    private string OK_Button = "js7"; //<- OK BUTTON DOES NOT WORK, USED ALTERNATIVE Mini BUTTON
 
    void Start()
     {   
