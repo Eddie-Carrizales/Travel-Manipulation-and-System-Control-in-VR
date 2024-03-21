@@ -34,9 +34,9 @@ public class ObjectAdjust : MonoBehaviour
         //Calculate the direction
         Vector3 directionToCamera = mainCamera.transform.position - transform.position;
 
-        // Make the object you are going to place face the camera, so it will only rotate around y-axis
-        Quaternion targetRotation = Quaternion.LookRotation(directionToCamera, Vector3.up);
-        Vector3 eulerRotation = targetRotation.eulerAngles;
-        transform.rotation = Quaternion.Euler(0, eulerRotation.y, 0);
+        // Make the object you are going to place face the camera (it will only rotate around y-axis)
+        Quaternion targetRotation = Quaternion.LookRotation(directionToCamera, Vector3.up); // get direction to where it will face
+        Vector3 eulerRotation = targetRotation.eulerAngles; //convert to euler angles
+        transform.rotation = Quaternion.Euler(0, eulerRotation.y, 0); //rotate it
     }
 }

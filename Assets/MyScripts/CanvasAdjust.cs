@@ -35,7 +35,7 @@ public class CanvasAdjust : MonoBehaviour
         //Calculate the direction
         Vector3 directionToCamera = mainCamera.transform.position - transform.position;
 
-        // Make the canvas face the camera (the quaternon only allows it to move in x and z so that it stays upright)
+        // Make the canvas face the camera (the quaternon only allows it to move in y axis that it stays upright)
         transform.rotation = Quaternion.LookRotation(directionToCamera, Vector3.up) * Quaternion.Euler(0, 180, 0);
     }
 }
